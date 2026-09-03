@@ -23,8 +23,9 @@ data of yours.
 
 ## Import
 
-Dashboards > New > Import > upload `dashboard.json`, pick your Infinity
-datasource when asked.
+Dashboards > New > Import, then either enter the grafana.com ID `25748`
+(https://grafana.com/grafana/dashboards/25748) or upload `dashboard.json`.
+Pick your Infinity datasource when asked.
 
 ## Configure your sites
 
