@@ -1,0 +1,770 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_INFINITY",
+      "label": "Infinity",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "yesoreyeram-infinity-datasource",
+      "pluginName": "Infinity"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.4.0"
+    },
+    {
+      "type": "datasource",
+      "id": "yesoreyeram-infinity-datasource",
+      "name": "Infinity",
+      "version": "2.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    }
+  ],
+  "id": null,
+  "uid": "site-weather",
+  "title": "Site Weather",
+  "description": "Outdoor weather at your sites (data centers, offices, plants) over the dashboard time range, plus active official weather warnings. Sites are dashboard variables; no API keys. Data: Open-Meteo, MeteoAlarm, US NWS.",
+  "tags": [
+    "weather",
+    "open-meteo",
+    "infinity"
+  ],
+  "editable": true,
+  "timezone": "",
+  "schemaVersion": 39,
+  "refresh": "",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "site",
+        "label": "Site",
+        "type": "custom",
+        "multi": true,
+        "includeAll": true,
+        "description": "One entry per site: Label : latitude=LAT&longitude=LON. Edit under Dashboard settings > Variables.",
+        "query": "Frankfurt : latitude=50.11&longitude=8.68,Toronto : latitude=43.65&longitude=-79.38,Singapore : latitude=1.35&longitude=103.82,Cape Town : latitude=-33.93&longitude=18.42",
+        "options": [
+          {
+            "text": "Frankfurt",
+            "value": "latitude=50.11&longitude=8.68",
+            "selected": false
+          },
+          {
+            "text": "Toronto",
+            "value": "latitude=43.65&longitude=-79.38",
+            "selected": false
+          },
+          {
+            "text": "Singapore",
+            "value": "latitude=1.35&longitude=103.82",
+            "selected": false
+          },
+          {
+            "text": "Cape Town",
+            "value": "latitude=-33.93&longitude=18.42",
+            "selected": false
+          }
+        ],
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      },
+      {
+        "name": "api",
+        "label": "Open-Meteo API",
+        "type": "custom",
+        "multi": false,
+        "includeAll": false,
+        "description": "Forecast covers the last 92 days plus 16 days ahead. Archive (ERA5) goes back to 1940 with a few days of lag.",
+        "query": "forecast (last 92d) : https://api.open-meteo.com/v1/forecast,archive (ERA5 for older windows) : https://archive-api.open-meteo.com/v1/archive",
+        "options": [
+          {
+            "text": "forecast (last 92d)",
+            "value": "https://api.open-meteo.com/v1/forecast",
+            "selected": true
+          },
+          {
+            "text": "archive (ERA5 for older windows)",
+            "value": "https://archive-api.open-meteo.com/v1/archive",
+            "selected": false
+          }
+        ],
+        "current": {
+          "text": "forecast (last 92d)",
+          "value": "https://api.open-meteo.com/v1/forecast"
+        }
+      },
+      {
+        "name": "meteoalarm_country",
+        "label": "MeteoAlarm countries",
+        "type": "custom",
+        "multi": true,
+        "includeAll": true,
+        "description": "MeteoAlarm feed names, lowercase country names (germany, france, italy, ...). One table per country.",
+        "query": "germany,france",
+        "options": [
+          {
+            "text": "germany",
+            "value": "germany",
+            "selected": false
+          },
+          {
+            "text": "france",
+            "value": "france",
+            "selected": false
+          }
+        ],
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      },
+      {
+        "name": "nws_states",
+        "label": "US states (NWS)",
+        "type": "custom",
+        "multi": true,
+        "includeAll": true,
+        "description": "US state codes for NWS active alerts, e.g. CA, NY.",
+        "query": "CA,NY",
+        "options": [
+          {
+            "text": "CA",
+            "value": "CA",
+            "selected": false
+          },
+          {
+            "text": "NY",
+            "value": "NY",
+            "selected": false
+          }
+        ],
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        }
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "${site:text}",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false,
+      "panels": [],
+      "repeat": "site"
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Now",
+      "description": "Current 2 m air temperature at the site.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 4,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "https://api.open-meteo.com/v1/forecast?${site}&current=temperature_2m&timezone=UTC",
+          "root_selector": "current",
+          "columns": [
+            {
+              "selector": "temperature_2m",
+              "text": "now",
+              "type": "number"
+            }
+          ],
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 30
+              },
+              {
+                "color": "red",
+                "value": 35
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "colorMode": "background",
+        "graphMode": "none"
+      }
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Temperature",
+      "description": "Hourly 2 m air temperature over the dashboard time range.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 4,
+        "y": 1,
+        "w": 10,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${api}?${site}&hourly=temperature_2m&start_date=${__from:date:YYYY-MM-DD}&end_date=${__to:date:YYYY-MM-DD}&timeformat=unixtime&timezone=UTC",
+          "root_selector": "$map(hourly.time, function($t, $i) { {\"time\": $t, \"value\": hourly.temperature_2m[$i]} })",
+          "columns": [
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "timestamp_epoch_s"
+            },
+            {
+              "selector": "value",
+              "text": "temperature",
+              "type": "number"
+            }
+          ],
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Apparent temperature",
+      "description": "Feels-like temperature (humidity, wind, radiation).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 14,
+        "y": 1,
+        "w": 10,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${api}?${site}&hourly=apparent_temperature&start_date=${__from:date:YYYY-MM-DD}&end_date=${__to:date:YYYY-MM-DD}&timeformat=unixtime&timezone=UTC",
+          "root_selector": "$map(hourly.time, function($t, $i) { {\"time\": $t, \"value\": hourly.apparent_temperature[$i]} })",
+          "columns": [
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "timestamp_epoch_s"
+            },
+            {
+              "selector": "value",
+              "text": "apparent temperature",
+              "type": "number"
+            }
+          ],
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Wind gusts",
+      "description": "Hourly maximum 10 m wind gust.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${api}?${site}&hourly=wind_gusts_10m&start_date=${__from:date:YYYY-MM-DD}&end_date=${__to:date:YYYY-MM-DD}&timeformat=unixtime&timezone=UTC",
+          "root_selector": "$map(hourly.time, function($t, $i) { {\"time\": $t, \"value\": hourly.wind_gusts_10m[$i]} })",
+          "columns": [
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "timestamp_epoch_s"
+            },
+            {
+              "selector": "value",
+              "text": "wind gusts",
+              "type": "number"
+            }
+          ],
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "velocityms",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Precipitation",
+      "description": "Hourly precipitation sum.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "timeseries",
+          "url": "${api}?${site}&hourly=precipitation&start_date=${__from:date:YYYY-MM-DD}&end_date=${__to:date:YYYY-MM-DD}&timeformat=unixtime&timezone=UTC",
+          "root_selector": "$map(hourly.time, function($t, $i) { {\"time\": $t, \"value\": hourly.precipitation[$i]} })",
+          "columns": [
+            {
+              "selector": "time",
+              "text": "time",
+              "type": "timestamp_epoch_s"
+            },
+            {
+              "selector": "value",
+              "text": "precipitation",
+              "type": "number"
+            }
+          ],
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "mm",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "row",
+      "title": "Active official warnings (now, not time-range bound)",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 8,
+      "type": "table",
+      "title": "MeteoAlarm: ${meteoalarm_country}",
+      "description": "All active warnings for the country from its national met service via MeteoAlarm (CC BY 4.0). Check the area column against your site.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "xml",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "https://feeds.meteoalarm.org/feeds/meteoalarm-legacy-atom-${meteoalarm_country}",
+          "root_selector": "$append([], feed.entry)",
+          "columns": [
+            {
+              "selector": "event",
+              "text": "event",
+              "type": "string"
+            },
+            {
+              "selector": "severity",
+              "text": "severity",
+              "type": "string"
+            },
+            {
+              "selector": "areaDesc",
+              "text": "area",
+              "type": "string"
+            },
+            {
+              "selector": "onset",
+              "text": "onset",
+              "type": "timestamp"
+            },
+            {
+              "selector": "expires",
+              "text": "expires",
+              "type": "timestamp"
+            },
+            {
+              "selector": "title",
+              "text": "headline",
+              "type": "string"
+            }
+          ],
+          "url_options": {
+            "method": "GET",
+            "headers": [
+              {
+                "key": "Accept",
+                "value": "application/atom+xml, application/xml, text/xml, */*"
+              },
+              {
+                "key": "User-Agent",
+                "value": "grafana-site-weather"
+              }
+            ]
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "event": 0,
+              "severity": 1,
+              "area": 2,
+              "onset": 3,
+              "expires": 4,
+              "headline": 5
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "filterable": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "onset",
+            "desc": true
+          }
+        ]
+      },
+      "repeat": "meteoalarm_country",
+      "repeatDirection": "h",
+      "maxPerRow": 2
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "US National Weather Service: ${nws_states:csv}",
+      "description": "Active NWS alerts for the selected states.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "https://api.weather.gov/alerts/active?area=${nws_states:csv}",
+          "root_selector": "$map(features, function($f) { {\"event\": $f.properties.event, \"severity\": $f.properties.severity, \"area\": $f.properties.areaDesc, \"onset\": $f.properties.onset, \"expires\": $f.properties.expires, \"headline\": $f.properties.headline} })",
+          "columns": [
+            {
+              "selector": "event",
+              "text": "event",
+              "type": "string"
+            },
+            {
+              "selector": "severity",
+              "text": "severity",
+              "type": "string"
+            },
+            {
+              "selector": "area",
+              "text": "area",
+              "type": "string"
+            },
+            {
+              "selector": "onset",
+              "text": "onset",
+              "type": "timestamp"
+            },
+            {
+              "selector": "expires",
+              "text": "expires",
+              "type": "timestamp"
+            },
+            {
+              "selector": "headline",
+              "text": "headline",
+              "type": "string"
+            }
+          ],
+          "url_options": {
+            "method": "GET",
+            "headers": [
+              {
+                "key": "Accept",
+                "value": "application/geo+json"
+              },
+              {
+                "key": "User-Agent",
+                "value": "grafana-site-weather"
+              }
+            ]
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "event": 0,
+              "severity": 1,
+              "area": 2,
+              "onset": 3,
+              "expires": 4,
+              "headline": 5
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "filterable": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "onset",
+            "desc": true
+          }
+        ]
+      }
+    }
+  ]
+}
