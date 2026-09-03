@@ -13,6 +13,8 @@ Weather Service alerts per state.
 No API keys. Sites are dashboard variables, so the JSON carries no location
 data of yours.
 
+![Site Weather dashboard with example cities](screenshot.png)
+
 ## Requirements
 
 - Grafana 10.4 or newer (Grafana Cloud works).
@@ -49,7 +51,7 @@ Save the dashboard after editing the variables so the values persist.
 - [Open-Meteo](https://open-meteo.com/) for conditions. Free for
   non-commercial use; commercial use needs an
   [Open-Meteo subscription](https://open-meteo.com/en/pricing). Each dashboard
-  load makes about five calls per site.
+  load makes about five calls per site plus one for the map.
 - [MeteoAlarm](https://meteoalarm.org/) for European warnings, CC BY 4.0.
 - [US National Weather Service API](https://www.weather.gov/documentation/services-web-api)
   for US alerts, public domain.
