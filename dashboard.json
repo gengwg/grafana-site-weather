@@ -39,6 +39,12 @@
       "id": "table",
       "name": "Table",
       "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "geomap",
+      "name": "Geomap",
+      "version": ""
     }
   ],
   "id": null,
@@ -65,31 +71,76 @@
         "label": "Site",
         "type": "custom",
         "multi": true,
-        "includeAll": true,
+        "includeAll": false,
         "description": "One entry per site: Label : latitude=LAT&longitude=LON. Edit under Dashboard settings > Variables.",
         "query": "Frankfurt : latitude=50.11&longitude=8.68,Toronto : latitude=43.65&longitude=-79.38,Singapore : latitude=1.35&longitude=103.82,Cape Town : latitude=-33.93&longitude=18.42",
         "options": [
           {
             "text": "Frankfurt",
             "value": "latitude=50.11&longitude=8.68",
-            "selected": false
+            "selected": true
           },
           {
             "text": "Toronto",
             "value": "latitude=43.65&longitude=-79.38",
-            "selected": false
+            "selected": true
           },
           {
             "text": "Singapore",
             "value": "latitude=1.35&longitude=103.82",
-            "selected": false
+            "selected": true
           },
           {
             "text": "Cape Town",
             "value": "latitude=-33.93&longitude=18.42",
-            "selected": false
+            "selected": true
           }
         ],
+        "current": {
+          "text": [
+            "Frankfurt",
+            "Toronto",
+            "Singapore",
+            "Cape Town"
+          ],
+          "value": [
+            "latitude=50.11&longitude=8.68",
+            "latitude=43.65&longitude=-79.38",
+            "latitude=1.35&longitude=103.82",
+            "latitude=-33.93&longitude=18.42"
+          ]
+        }
+      },
+      {
+        "name": "lats",
+        "label": "lats",
+        "type": "query",
+        "hide": 2,
+        "multi": true,
+        "includeAll": true,
+        "refresh": 1,
+        "sort": 0,
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${DS_INFINITY}"
+        },
+        "definition": "latitude list from $site",
+        "query": {
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "inline",
+            "parser": "backend",
+            "format": "table",
+            "data": "${site:json}",
+            "root_selector": "$map($, function($v) { $substringBefore($substringAfter($v & \"&\", \"latitude=\"), \"&\") })",
+            "columns": [],
+            "url_options": {
+              "method": "GET"
+            }
+          }
+        },
         "current": {
           "text": [
             "All"
@@ -97,7 +148,50 @@
           "value": [
             "$__all"
           ]
-        }
+        },
+        "options": [],
+        "description": "Derived from the site variable for the map; do not edit."
+      },
+      {
+        "name": "lons",
+        "label": "lons",
+        "type": "query",
+        "hide": 2,
+        "multi": true,
+        "includeAll": true,
+        "refresh": 1,
+        "sort": 0,
+        "datasource": {
+          "type": "yesoreyeram-infinity-datasource",
+          "uid": "${DS_INFINITY}"
+        },
+        "definition": "longitude list from $site",
+        "query": {
+          "queryType": "infinity",
+          "infinityQuery": {
+            "refId": "variable",
+            "type": "json",
+            "source": "inline",
+            "parser": "backend",
+            "format": "table",
+            "data": "${site:json}",
+            "root_selector": "$map($, function($v) { $substringBefore($substringAfter($v & \"&\", \"longitude=\"), \"&\") })",
+            "columns": [],
+            "url_options": {
+              "method": "GET"
+            }
+          }
+        },
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": [],
+        "description": "Derived from the site variable for the map; do not edit."
       },
       {
         "name": "api",
@@ -192,10 +286,164 @@
     {
       "id": 1,
       "type": "row",
-      "title": "${site:text}",
+      "title": "Overview",
       "gridPos": {
         "x": 0,
         "y": 0,
+        "w": 24,
+        "h": 1
+      },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "geomap",
+      "title": "Sites, colored by current temperature",
+      "description": "One marker per selected site. Color follows the same thresholds as the tiles (orange from 30 C, red from 35 C).",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "${DS_INFINITY}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 1,
+        "w": 24,
+        "h": 10
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "${DS_INFINITY}"
+          },
+          "type": "json",
+          "source": "url",
+          "parser": "backend",
+          "format": "table",
+          "url": "https://api.open-meteo.com/v1/forecast?latitude=${lats:csv}&longitude=${lons:csv}&current=temperature_2m&timezone=UTC",
+          "root_selector": "$map($, function($r, $i) { {\"site\": $split(\"${site:text}\", \" + \")[$i], \"lat\": $r.latitude, \"lon\": $r.longitude, \"temp\": $r.current.temperature_2m} })",
+          "columns": [
+            {
+              "selector": "site",
+              "text": "site",
+              "type": "string"
+            },
+            {
+              "selector": "lat",
+              "text": "lat",
+              "type": "number"
+            },
+            {
+              "selector": "lon",
+              "text": "lon",
+              "type": "number"
+            },
+            {
+              "selector": "temp",
+              "text": "temp",
+              "type": "number"
+            }
+          ],
+          "url_options": {
+            "method": "GET"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 30
+              },
+              {
+                "color": "red",
+                "value": 35
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "view": {
+          "id": "fit",
+          "allLayers": true,
+          "padding": 10,
+          "zoom": 2
+        },
+        "basemap": {
+          "type": "osm-standard",
+          "name": "OpenStreetMap"
+        },
+        "layers": [
+          {
+            "type": "markers",
+            "name": "sites",
+            "tooltip": true,
+            "location": {
+              "mode": "coords",
+              "latitude": "lat",
+              "longitude": "lon"
+            },
+            "config": {
+              "showLegend": false,
+              "style": {
+                "size": {
+                  "fixed": 9
+                },
+                "color": {
+                  "field": "temp",
+                  "fixed": "green"
+                },
+                "opacity": 0.9,
+                "symbol": {
+                  "mode": "fixed",
+                  "fixed": "img/icons/marker/circle.svg"
+                },
+                "text": {
+                  "field": "site",
+                  "fixed": ""
+                },
+                "textConfig": {
+                  "fontSize": 12,
+                  "offsetY": -14,
+                  "textAlign": "center",
+                  "textBaseline": "middle"
+                }
+              }
+            }
+          }
+        ],
+        "controls": {
+          "showZoom": true,
+          "mouseWheelZoom": false
+        },
+        "tooltip": {
+          "mode": "details"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "row",
+      "title": "${site:text}",
+      "gridPos": {
+        "x": 0,
+        "y": 11,
         "w": 24,
         "h": 1
       },
@@ -204,7 +452,7 @@
       "repeat": "site"
     },
     {
-      "id": 2,
+      "id": 4,
       "type": "stat",
       "title": "Now",
       "description": "Current 2 m air temperature at the site.",
@@ -214,7 +462,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 1,
+        "y": 12,
         "w": 4,
         "h": 7
       },
@@ -279,7 +527,7 @@
       }
     },
     {
-      "id": 3,
+      "id": 5,
       "type": "timeseries",
       "title": "Temperature",
       "description": "Hourly 2 m air temperature over the dashboard time range.",
@@ -289,7 +537,7 @@
       },
       "gridPos": {
         "x": 4,
-        "y": 1,
+        "y": 12,
         "w": 10,
         "h": 7
       },
@@ -343,7 +591,7 @@
       }
     },
     {
-      "id": 4,
+      "id": 6,
       "type": "timeseries",
       "title": "Apparent temperature",
       "description": "Feels-like temperature (humidity, wind, radiation).",
@@ -353,7 +601,7 @@
       },
       "gridPos": {
         "x": 14,
-        "y": 1,
+        "y": 12,
         "w": 10,
         "h": 7
       },
@@ -407,7 +655,7 @@
       }
     },
     {
-      "id": 5,
+      "id": 7,
       "type": "timeseries",
       "title": "Wind gusts",
       "description": "Hourly maximum 10 m wind gust.",
@@ -417,7 +665,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 8,
+        "y": 19,
         "w": 12,
         "h": 7
       },
@@ -471,7 +719,7 @@
       }
     },
     {
-      "id": 6,
+      "id": 8,
       "type": "timeseries",
       "title": "Precipitation",
       "description": "Hourly precipitation sum.",
@@ -481,7 +729,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 8,
+        "y": 19,
         "w": 12,
         "h": 7
       },
@@ -535,12 +783,12 @@
       }
     },
     {
-      "id": 7,
+      "id": 9,
       "type": "row",
       "title": "Active official warnings (now, not time-range bound)",
       "gridPos": {
         "x": 0,
-        "y": 15,
+        "y": 26,
         "w": 24,
         "h": 1
       },
@@ -548,7 +796,7 @@
       "panels": []
     },
     {
-      "id": 8,
+      "id": 10,
       "type": "table",
       "title": "MeteoAlarm: ${meteoalarm_country}",
       "description": "All active warnings for the country from its national met service via MeteoAlarm (CC BY 4.0). Check the area column against your site.",
@@ -558,7 +806,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 16,
+        "y": 27,
         "w": 12,
         "h": 8
       },
@@ -659,7 +907,7 @@
       "maxPerRow": 2
     },
     {
-      "id": 9,
+      "id": 11,
       "type": "table",
       "title": "US National Weather Service: ${nws_states:csv}",
       "description": "Active NWS alerts for the selected states.",
@@ -669,7 +917,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 24,
+        "y": 35,
         "w": 24,
         "h": 8
       },

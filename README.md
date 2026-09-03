@@ -5,9 +5,10 @@ dashboard time range, plus the official weather warnings active right now.
 Built for reading a cooling or power incident against the weather after the
 fact: set the time picker to the incident window and the hourly panels follow.
 
-Per site: current temperature, hourly temperature, apparent temperature, wind
-gusts, precipitation. Plus MeteoAlarm warnings per European country and US
-National Weather Service alerts per state.
+A world map of your sites colored by current temperature, then per site:
+current temperature, hourly temperature, apparent temperature, wind gusts,
+precipitation. Plus MeteoAlarm warnings per European country and US National
+Weather Service alerts per state.
 
 No API keys. Sites are dashboard variables, so the JSON carries no location
 data of yours.
@@ -30,7 +31,10 @@ datasource when asked.
 Dashboard settings > Variables:
 
 - `site`: one entry per site, `Label : latitude=LAT&longitude=LON`, comma
-  separated. A row of panels repeats per selected site.
+  separated. A row of panels repeats per selected site. It is multi-select
+  without an "All" option on purpose: the map takes its marker names from the
+  selection. Two hidden variables, `lats` and `lons`, are derived from it for
+  the map; leave them alone.
 - `meteoalarm_country`: lowercase country names as used by MeteoAlarm feeds
   (`germany`, `france`, `italy`, ...). One warnings table per country.
 - `nws_states`: US state codes (`CA`, `NY`, ...) for NWS active alerts.
